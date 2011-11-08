@@ -56,6 +56,7 @@ function SmileySlider(container, imgSrc) {
     // head position
     
     var onHeadMove = null
+    var onHeadFinish = null
     
     function positionInt(e) {
         if (e === undefined) {
@@ -65,10 +66,11 @@ function SmileySlider(container, imgSrc) {
             var p = position()
             drawFace(face, 100, p, 0.8)
             if (onHeadMove) onHeadMove(p)
+            return p
         }
     }
     
-    function position(e) {
+    function position(e, e2) {
         if (e === undefined) {
             return lerp(0, 0, maxHeadX, 1, positionInt())
         } else if (typeof(e) == "function") {
@@ -76,6 +78,10 @@ function SmileySlider(container, imgSrc) {
         } else {
             positionInt(lerp(0, 0, 1, maxHeadX, e))
         }
+
+        if (typeof(e2) == "function") {
+            onHeadFinish = e2
+        } 
     }
     
     this.position = position    
@@ -96,7 +102,7 @@ function SmileySlider(container, imgSrc) {
             grabX = pos.x - headX
         }
         
-        positionInt(pos.x - grabX)
+        var p = positionInt(pos.x - grabX)
 
         var oldMove = document.onmousemove
         document.onmousemove = function (e) {
@@ -107,6 +113,7 @@ function SmileySlider(container, imgSrc) {
         
         var oldUp = document.onmouseup
         document.onmouseup = function (e) {
+            if (onHeadFinish) onHeadFinish(position())
             document.onmousemove = oldMove
             document.onmouseup = oldUp
         }
